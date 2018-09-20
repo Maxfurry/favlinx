@@ -1,0 +1,90 @@
+<div class = "container-fluid">
+    <h1>{{classname}}</h1>
+    <p>Broadcast video</p>
+	<video id = "screen" style="width: 680px; height: 320px;" autoplay="true"></video>
+</div>
+
+<div id = "messages">
+    <h2>Messages</h2>
+    <div id="chat-window">
+        <div id="output"></div>
+        <div id="feedback"></div>
+    </div>
+    <input id="handle" type="text" value="{{handle}}" readonly="readonly"/>
+    <input id="message" type="text" placeholder="Message" />
+    <button id="send">Send</button>
+</div>
+
+<script src="/js/credential.js"></script>
+<script src="/js/chat.js"></script>
+
+<script type="text/javascript">
+    /*global socket, video, config*/
+	const peerConnections = {};
+	let video_on = null;
+    let room = '{{classname}}';
+	let user = '{{handle}}';
+	
+	/** @type {MediaStreamConstraints} */
+
+	getScreenConstraints(function(error, screen_constraints) {
+		if (error) {
+			return alert(error);
+		}
+
+		navigator.mediaDevices.getUserMedia({audio: true, video: {
+			mediaSource: 'screen'
+		}})
+		.then(function(stream) {
+			screen.srcObject = stream;
+			socket.emit('broadcaster');
+		}).catch(error => {
+			console.error(error)
+			alert(JSON.stringify(error, null, '\t'));
+		});
+	});
+	// Listenning to know when a viewer(watcher) is available
+	socket.on('watcher', function(id) {
+		// When a viewer is available
+		const offerer = new RTCPeerConnection(config);
+		peerConnections[id] = offerer;
+		offerer.addStream(screen.srcObject);	
+		offerer.createOffer()
+		.then(sdp => offerer.setLocalDescription(sdp))
+		.then(function () {
+			// Sending an offer the listenner
+			socket.emit('offer', id, offerer.localDescription);
+			console.log(id);
+		});
+
+		// Creating Ice candidate 
+		// Will be used if there is no reply to the offer
+		offerer.onicecandidate = function(event) {
+			// If Ice candidate is available
+			// Send details to the listenner through the server
+			if (event.candidate) {
+				socket.emit('candidate', id, event.candidate);
+			}
+		};
+	});
+
+	// Listenning for response from the viewer
+	socket.on('answer', function(id, description) {
+		// If there is a reply to the offer sent 
+		// direct peer connection is used 
+		peerConnections[id].setRemoteDescription(description);
+	});
+
+	// Listening for listener's details
+	socket.on('candidate', function(id, candidate) {
+		const nc = new RTCIceCandidate(candidate);
+		// SRUN or TURN is used instead of direct peer connection
+		peerConnections[id].addIceCandidate(nc);
+	});
+
+	//Closses connection
+	socket.on('bye', function(id) {
+		peerConnections[id] && peerConnections[id].close();
+		delete peerConnections[id];
+	});
+</script>

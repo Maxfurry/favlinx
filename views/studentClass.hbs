@@ -1,0 +1,67 @@
+<div class = "container-fluid">
+    <h1>{{classname}}</h1>
+    <video id = "screen" style="width: 1400px; height: 700px; margin: auto;" autoplay></video>
+</div>
+
+<div id = "messages">
+    <h2>Messages</h2>
+    <div id="chat-window">
+        <div id="output"></div>
+        <div id="feedback"></div>
+    </div>
+    <input id="handle" type="text" value="{{handle}}" readonly="readonly"/>
+    <input id="message" type="text" placeholder="Message" />
+    <button id="send">Send</button>
+</div>
+
+<script src="/js/chat.js"></script>
+<script src="/js/credential.js"></script>
+
+<script>
+   /*global socket, video, config*/
+let watcher;
+let room = '{{classname}}';
+let user = '{{handle}}';
+
+socket.on('connect', function() {
+    // Telling the server that listenner(watcher) is avalable
+	socket.emit('watcher');
+});
+
+// Listening for offer from the broadcaster
+socket.on('offer', function(id, description) {
+    // When offer is avalable
+	watcher = new RTCPeerConnection(config);
+	watcher.setRemoteDescription(description)
+	.then(() => watcher.createAnswer())
+	.then(sdp => watcher.setLocalDescription(sdp))
+	.then(function () {
+        // Telling the server that you have accepted offer 
+        // then send details to the broadcaster through the server
+		socket.emit('answer', id, watcher.localDescription);
+	});
+
+	watcher.onaddstream = function(event) {
+		screen.srcObject = event.stream;
+	};
+	watcher.onicecandidate = function(event) {
+		if (event.candidate) {
+			socket.emit('candidate', id, event.candidate);
+		}
+	};
+});
+
+socket.on('candidate', function(id, candidate) {
+  const nc = new RTCIceCandidate(candidate);
+  watcher.addIceCandidate(nc)
+  .catch(e => console.error(e));
+});
+
+socket.on('broadcaster', function() {
+  socket.emit('watcher');
+});
+
+socket.on('bye', function() {
+	watcher.close();
+});
+</script>
