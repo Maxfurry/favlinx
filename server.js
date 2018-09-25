@@ -4,6 +4,10 @@ const bodyParser = require('body-parser');
 const hbs = require('express-handlebars');
 const socket = require('socket.io');
 
+var indexRouter = require('./routes/index');
+var classroom = require('./routes/class');
+var messagings = require('./routes/message');
+
 const app = express();
 
 // view engine setup
@@ -15,26 +19,24 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(express.static(path.join(__dirname, 'public')));
 
-/* GET login page. */
+app.use('/', indexRouter);
+app.use('/class', classroom);
+app.use('/messenger', messagings);
 
-
-/* GET home page. */
-app.get('/', function(req, res, next) {
-  res.render('index');
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
 });
 
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-app.get('/teach', function(req, res, next) {
-  let classname = req.query.classname;
-  let handle = req.query.username;
-  console.log(classname, handle)
-  res.render('teacherClass', {classname: classname, handle: handle});
-});
-
-app.get('/learn', function(req, res, next) {
-  let classname = req.query.classname;
-  let handle = req.query.username;
-  res.render('studentClass', {classname: classname, handle: handle});
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
 });
 
 // PORT
