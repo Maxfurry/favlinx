@@ -1,11 +1,7 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const controller = require('../controller/message');
 
-router.get('/', function(req, res, next) {
-    let groupname = req.query.groupname;
-    let handle = req.query.username;
-    console.log(groupname, handle)
-    res.render('messagings', {groupname: groupname, handle: handle});
-});
+router.get('/', controller.getMessagengerPage);
   
 module.exports = router;
