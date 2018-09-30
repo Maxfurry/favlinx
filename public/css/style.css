@@ -2,3 +2,16 @@
 	margin: 0;
 	padding: 0;
 }
+
+.info {
+	margin: 30px 20px 0 20px; 
+}
+
+hr {
+	margin: 0;
+	margin-bottom: 8px;
+}
+
+#courses {
+	margin: 0;
+}

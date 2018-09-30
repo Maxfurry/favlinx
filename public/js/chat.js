@@ -8,7 +8,7 @@ var message = document.getElementById('message'),
 //Make Connection
 const socket = io();
 socket.on('connect', () => {
-    console.log('The name of the room is '+room);
+    console.log('The name of the room is '+room[0]);
     socket.emit('createRoom', room);
 });
 

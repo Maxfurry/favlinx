@@ -1,7 +1,10 @@
+const fs = require('fs');
+
 module.exports = function (io) {
   io.on("connection", (socket) =>{
     // Global variables 
     let roomname;
+    let page;
     let broadcaster;
     let users = [];
 
@@ -9,7 +12,8 @@ module.exports = function (io) {
     console.log("Made socket connection",socket.id);
     socket.on('createRoom', (room) => {
       socket.join(room);
-      roomname = room;
+      roomname = room[0];
+      page = room[1];
       console.log('The name of the room is '+room);
     });
 
@@ -47,6 +51,25 @@ module.exports = function (io) {
     });
 
     socket.on('disconnect', function() {
+      if(page === 'class') {
+        fs.readFile(`model/db/${page}.json`, 'utf-8', (err, data)=> {
+          if (err) {
+              console.log(err);
+              throw err;
+          }
+          let arrayOfObjects = JSON.parse(data);
+          delete arrayOfObjects[roomname];
+          fs.writeFile(`model/db/${page}.json`, JSON.stringify(arrayOfObjects, null, 2), 'utf-8', (err) => {
+              if(err) {
+                  console.log(err);
+                  throw err;
+              } else {
+                  console.log('deleted');
+              }
+          })
+      })
+    }
+    console.log(page);
       socket.to(roomname).emit('bye', socket.id);
     });
   });  

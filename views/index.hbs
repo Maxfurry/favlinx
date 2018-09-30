@@ -2,7 +2,7 @@
 <hr/>
 
 <div class = "container-fluid">
-    <form id = "form" method="get">
+    <form id = "form" method="post">
         {{!-- <p id = "error"></p> --}}
         <div class = "form-group">
             <label for="username">username</label>
@@ -19,5 +19,83 @@
         <button type="submit" id ="conferenceCalls" class="btn btn-primary" disabled>Conference Calls</button>
     </form>    
 </div>
+
+<div class = "info">
+    <div id = "classInfo">
+        <h3>Classes currently on</h1>
+        <hr>
+        <div id = "courses"></div>
+    </div>
+
+    <div id = "messengerInfo">
+        <h3>Chat groups currently on</h1>
+        <hr>
+        <div id = "chats"></div>
+    </div>
+</div>
+
+<script>
+let courses = '{{courses}}';
+let chats = '{{chats}}'
+let crs = document.getElementById('courses');
+let cht = document.getElementById('chats');
+
+let mycourse = '';
+let myroom = '';
+
+let makeRad = (name,value,text) => {
+    let label = document.createElement('label');
+    let radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = name;
+    radio.id = name;
+    radio.value = value;
+    label.appendChild(radio);
+    label.appendChild(document.createTextNode(text));
+    return label;
+}
+
+let i = 0;
+
+for(i in courses) {
+    if (courses[i] != ',') {
+        mycourse += courses[i];
+    } else if (courses[i] == ',')
+    {
+        let radCrs = makeRad('chooseClass', mycourse, mycourse);
+        crs.appendChild(radCrs);
+        //crs.innerHTML += `<input type = "radio" id = "chooseClass" name = "chooseClass" value = ${mycourse}>${mycourse}</input><br>`;
+        mycourse = '';
+    }
+}
+
+let radCrs = makeRad('chooseClass', mycourse, mycourse);
+crs.appendChild(radCrs);
+
+if (i == 0) {
+    crs.innerHTML = 'No active class now, you can create one!';
+}
+
+
+let x = 0;
+
+for(x in chats) {
+    if (chats[x] != ',') {
+        myroom += chats[x];
+    } else if (chats[x] == ',')
+    {   
+        let radMsg = makeRad('chooseGroup', myroom, myroom);
+        cht.appendChild(radMsg);
+        myroom = '';
+    }
+}
+
+let radMsg = makeRad('chooseGroup', myroom, myroom);
+cht.appendChild(radMsg);
+
+if (x == 0) {
+    cht.innerHTML = 'No active chat group now, you can create one!';
+}
+</script>
 
 <script src="/js/index.js"></script>
