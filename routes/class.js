@@ -1,22 +1,9 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router(); 
+const controller = require('../controller/class');
 
-router.get('/', function(req, res, next) {
-    res.render('class');
-});
+router.get('/teach', controller.createNewClass);
   
-
-router.get('/teach', function(req, res, next) {
-    let classname = req.query.classname;
-    let handle = req.query.username;
-    console.log(classname, handle)
-    res.render('teacherClass', {classname: classname, handle: handle});
-});
-  
-router.get('/learn', function(req, res, next) {
-    let classname = req.query.classname;
-    let handle = req.query.username;
-    res.render('studentClass', {classname: classname, handle: handle});
-});
+router.get('/learn', controller.joinClass);
   
 module.exports = router;

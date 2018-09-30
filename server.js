@@ -4,9 +4,9 @@ const bodyParser = require('body-parser');
 const hbs = require('express-handlebars');
 const socket = require('socket.io');
 
-var indexRouter = require('./routes/index');
-var classroom = require('./routes/class');
-var messagings = require('./routes/message');
+const indexRouter = require('./routes/index');
+const classroom = require('./routes/class');
+const messagings = require('./routes/message');
 
 const app = express();
 
