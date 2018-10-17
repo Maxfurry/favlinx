@@ -7,6 +7,7 @@ const socket = require('socket.io');
 const indexRouter = require('./routes/index');
 const classroom = require('./routes/class');
 const messagings = require('./routes/message');
+const conference = require('./routes/conference');
 
 const app = express();
 
@@ -22,6 +23,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/class', classroom);
 app.use('/messenger', messagings);
+//app.use('/conference', conference);
+
+app.post('/conference',function(req, res, next) {
+  res.render('conference');
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

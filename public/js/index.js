@@ -79,6 +79,6 @@ videoCalls.onclick = () => {
 };
 
 conferenceCalls.onclick = () => {
-    form.action = '#';
+    form.action = '/conference';
     form.submit();
 };
